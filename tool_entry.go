@@ -14,11 +14,11 @@ import (
 )
 func Entry() {
 	app := &cli.App{
-		Name:                   "jjtool",
-		Usage:                  "jjtool -h",
-		UsageText:              "jjtool是一个md一键式工具",
+		Name:                   APPName,
+		Usage:                  "bt -h",
+		UsageText:              "bt是一个md一键式工具",
 		Version:                Version + " " + Build,
-		Description:            "github.com/landers1037/jjtool",
+		Description:            "github.com/landers1037/bt",
 		Commands:               initCmds(),
 		Flags:                  nil,
 		EnableBashCompletion:   true,
