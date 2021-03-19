@@ -135,6 +135,7 @@ func ParseMeta(fileRaw []byte) Meta {
 	}
 }
 
+// 使用正则提取yaml
 func ParseMetaYaml(fileRaw []byte) Meta {
 	type yamlData struct {
 		Name       string `yaml:"name"`
@@ -177,7 +178,7 @@ func ParseMetaYaml(fileRaw []byte) Meta {
 }
 
 // 使用yaml front解析yaml头部信息
-func ParseYmalFront(fileRaw []byte) Meta {
+func ParseYamlFront(fileRaw []byte) Meta {
 	type yamlData struct {
 		Name       string `yaml:"name"`
 		ID         int	`yaml:"id"`
@@ -276,7 +277,7 @@ func NewMdByDB(name string, db string) error {
 
 // md文件byte转html原生字符串
 func MarkdownToHtml(md []byte) string {
-	return ""
+	return fmt.Sprintf("%s", md)
 }
 
 // 生成最终的要存入数据库前的结构体数据
@@ -288,7 +289,7 @@ func GenMdData(file string) MdData {
 	}
 	md := ParseMd(fileRaw)
 	mdAbs := ParseAbs(md)
-	meta := ParseMeta(fileRaw)
+	meta := ParseYamlFront(fileRaw)
 	htmlAbs := MarkdownToHtml(mdAbs)
 	htmlBody := MarkdownToHtml(md)
 

@@ -1,0 +1,16 @@
+{
+  "compile_entry": ".",
+  "app_info": {
+    "name": "blog_tool",
+    "id": "bt",
+    "version": "1.4",
+    "description": "blog toolchain"
+  },
+  "workdir": {
+    "root": "/home/apps",
+    "log": "."
+  },
+  "cmd": {
+    "help": "bt -h"
+  }
+}

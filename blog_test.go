@@ -67,7 +67,7 @@ func TestParseYmalFront(t *testing.T) {
 	if e != nil {
 		t.Error("error")
 	}else {
-		res := ParseYmalFront(f)
+		res := ParseYamlFront(f)
 		t.Logf("\n%+v", res)
 	}
 }
