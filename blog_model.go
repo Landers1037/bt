@@ -87,3 +87,11 @@ type DB_BLOG_SUBSCRIBE struct {
 	SubscribeDate string `json:"subscribe_date"`
 	Period string `json:"period"`
 }
+
+type DB_BLOG_ZHUANLAN struct {
+	Model
+	Name string `gorm:"unique;not null" json:"name"`
+	Title string `json:"title"`
+	Date string `json:"date"`
+	Posts string `json:"posts"`
+}

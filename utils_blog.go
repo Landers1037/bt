@@ -57,7 +57,7 @@ func ReadMd(file string) ([]byte, error) {
 
 // 一级解析器 生成不带meta的md字节
 func ParseMd(fileRaw []byte) []byte {
-	reg := regexp.MustCompile(`(?s)(^---\n[\s\S].*?\n---\n)(.*)`)
+	reg := regexp.MustCompile(`(?s)(^---[\s\S]*?\n---)(.*)`)
 	res := reg.Find(fileRaw)
 	res = reg.ReplaceAll(fileRaw, []byte("$2"))
 
@@ -67,7 +67,7 @@ func ParseMd(fileRaw []byte) []byte {
 
 // 二级解析器 生成不带摘要的md字节
 func ParseMdAbs(fileRaw []byte) []byte {
-	reg := regexp.MustCompile(`(?s).*<!--more-->\n`)
+	reg := regexp.MustCompile(`(?s).*<!--more-->`)
 	res := reg.ReplaceAll(fileRaw, []byte(""))
 
 	return res
@@ -76,10 +76,10 @@ func ParseMdAbs(fileRaw []byte) []byte {
 // 三级解析器 生成摘要信息
 func ParseAbs(fileRaw []byte) []byte {
 	// 摘要不存在时 使用默认摘要
-	reg := regexp.MustCompile(`(?s)(.*)(<!--more-->\n)`)
+	reg := regexp.MustCompile(`(?s)(.*)(<!--more-->)`)
 	res := reg.Find(fileRaw)
 	if len(res) <= 0 {
-		return []byte("<code>Sorry</code>该文章暂无概述💊")
+		return []byte("<code>Sorry</code>该文章暂无概述")
 	}
 	res = reg.ReplaceAll(res, []byte("$1"))
 
@@ -455,6 +455,7 @@ func CreateDB(data []MdData, db string) error {
 	dbCon.CreateTable(DB_BLOG_VIEWS{})
 	dbCon.CreateTable(DB_BLOG_ADMIN{})
 	dbCon.CreateTable(DB_BLOG_SUBSCRIBE{})
+	dbCon.CreateTable(DB_BLOG_ZHUANLAN{})
 
 	// 开始存库
 	// 这里假设md文件一定是存在id且按顺序的， 没有的会随机存储 后期可以更新id

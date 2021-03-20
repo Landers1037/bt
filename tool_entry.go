@@ -92,7 +92,8 @@ func initCmds() ([]*cli.Command) {
 					if e != nil {
 						return e
 					}
-					fmt.Printf("文章meta元信息如下: \n%+v\n", ParseMeta(fileRaw))
+					fmt.Printf("文章meta元信息如下: \n%+v\n", ParseYamlFront(fileRaw))
+					fmt.Printf("文章摘要如下: \n%s\n", ParseAbs(ParseMd(fileRaw)))
 					fmt.Printf("文章正文内容如下: \n%s\n", ParseMd(fileRaw))
 					return nil
 				}else {
