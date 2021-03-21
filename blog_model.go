@@ -94,4 +94,5 @@ type DB_BLOG_ZHUANLAN struct {
 	Title string `json:"title"`
 	Date string `json:"date"`
 	Posts string `json:"posts"`
+	Content string `json:"content"`
 }
