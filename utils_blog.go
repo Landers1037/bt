@@ -506,8 +506,91 @@ func CreateDB(data []MdData, db string) error {
 }
 
 // 增量更新数据库
-// 全量更新文章
+// 全量更新文章 按照name区分不存在则为新增
+// 联动更新标签
 func UpdatDB(file string, db string) error {
+	mdData := GenMdData(file)
+	dbc, e := gorm.Open("sqlite3", db)
+	if e != nil {
+		return e
+	}
+	dbc.SingularTable(true)
+	// 判断是否更新
+	e = dbc.Model(DB_BLOG_POST{}).Where("name = ?", mdData.Meta.Name).Error
+	if e != nil {
+		// 新建文章
+		fmt.Printf("开始添加文章%s\n", mdData.Meta.Name)
+		post := DB_BLOG_POST{
+			ID:         mdData.Meta.ID,
+			Name:       mdData.Meta.Name,
+			Title:      mdData.Meta.Title,
+			Date:       mdData.Meta.Date,
+			DatePlus:   mdData.Meta.DatePlus,
+			Update:     "",
+			Abstract:   mdData.Abstract,
+			Content:    mdData.Body,
+			Tags:       strings.Join(mdData.Meta.Tags, " "),
+			Categories: strings.Join(mdData.Meta.Categories, " "),
+			Pin:        0,
+		}
+		dbc.Model(DB_BLOG_POST{}).Create(&post)
+		fmt.Printf("开始添加标签 分类\n")
+		for _, t := range mdData.Meta.Tags {
+			tag := DB_BLOG_TAGS{
+				Tag:   t,
+				Name:  mdData.Meta.Name,
+			}
+			dbc.Model(&DB_BLOG_TAGS{}).Create(&tag)
+		}
+
+		// cates
+		for _, c := range mdData.Meta.Categories {
+			cate := DB_BLOG_CATES{
+				Cate:  c,
+				Name:  mdData.Meta.Name,
+			}
+			dbc.Model(&DB_BLOG_CATES{}).Create(&cate)
+		}
+	}else {
+		// 默认只会更新几大要素 标题 标签 分类 内容 摘要
+		fmt.Printf("开始更新文章%s\n", mdData.Meta.Name)
+		tmpMap := make(map[string]interface{})
+		tmpMap = map[string]interface{}{
+			"title": mdData.Meta.Title,
+			"date": mdData.Meta.Date,
+			"date_plus": mdData.Meta.DatePlus,
+			"abstract": mdData.Abstract,
+			"content": mdData.Body,
+			"tags": strings.Join(mdData.Meta.Tags, " "),
+			"categories": strings.Join(mdData.Meta.Categories, " "),
+		}
+		e = dbc.Model(DB_BLOG_POST{}).Where("name = ?", mdData.Meta.Name).Updates(tmpMap).Error
+		if e != nil {
+			return e
+		}
+		fmt.Printf("开始更新标签 分类\n")
+		// 更新方式删除原有的 重新生成
+		dbc.Where("name = ?", mdData.Meta.Name).Delete(DB_BLOG_TAGS{})
+		dbc.Where("name = ?", mdData.Meta.Name).Delete(DB_BLOG_CATES{})
+		for _, t := range mdData.Meta.Tags {
+			tag := DB_BLOG_TAGS{
+				Tag:   t,
+				Name:  mdData.Meta.Name,
+			}
+			dbc.Model(&DB_BLOG_TAGS{}).Create(&tag)
+		}
+
+		// cates
+		for _, c := range mdData.Meta.Categories {
+			cate := DB_BLOG_CATES{
+				Cate:  c,
+				Name:  mdData.Meta.Name,
+			}
+			dbc.Model(&DB_BLOG_CATES{}).Create(&cate)
+		}
+	}
+	defer dbc.Close()
+	fmt.Println("更新完毕")
 	return nil
 }
 
