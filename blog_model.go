@@ -90,7 +90,7 @@ type DB_BLOG_SUBSCRIBE struct {
 
 type DB_BLOG_ZHUANLAN struct {
 	Model
-	Name string `gorm:"unique;not null" json:"name"`
+	Name string `gorm:"unique" json:"name"`
 	Title string `json:"title"`
 	Date string `json:"date"`
 	Posts string `json:"posts"`
