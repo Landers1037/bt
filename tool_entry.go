@@ -167,5 +167,23 @@ func initCmds() ([]*cli.Command) {
 				}
 			},
 		},
+		{
+			Name: "dbm",
+			Usage: "dbm [old db] [new db]",
+			UsageText: "数据库迁移 支持创建新表",
+			Aliases: []string{"dbm"},
+			Category: "database",
+			Action: func(c *cli.Context) error {
+				var olddb string
+				var newdb string
+				if c.Args().Len() >= 2 {
+					olddb = c.Args().Slice()[0]
+					newdb = c.Args().Slice()[1]
+					return MigrateDB(olddb, newdb)
+				} else {
+					return errors.New("输入的参数不足")
+				}
+			},
+		},
 	}
 }

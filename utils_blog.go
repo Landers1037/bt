@@ -642,3 +642,95 @@ func UpdatePin(name string, db string) error {
 func MigrateMd() error {
 	return nil
 }
+
+// 数据库迁移 只会迁移文章 标签 分类 view
+func MigrateDB(old, new string) error {
+	dbOld, e1 := gorm.Open("sqlite3", old)
+	dbNew, e2 := gorm.Open("sqlite3", new)
+	if e1 != nil || e2 != nil {
+		return errors.New("数据库连接失败")
+	}
+	dbOld.SingularTable(true)
+	dbNew.SingularTable(true)
+	fmt.Println("开始创建表")
+	dbNew.CreateTable(DB_BLOG_POST{})
+	dbNew.CreateTable(DB_BLOG_MESSAGES{})
+	dbNew.CreateTable(DB_BLOG_TAGS{})
+	dbNew.CreateTable(DB_BLOG_CATES{})
+	dbNew.CreateTable(DB_BLOG_COMMENTS{})
+	dbNew.CreateTable(DB_BLOG_LIKES{})
+	dbNew.CreateTable(DB_BLOG_SHARE{})
+	dbNew.CreateTable(DB_BLOG_VIEWS{})
+	dbNew.CreateTable(DB_BLOG_ADMIN{})
+	dbNew.CreateTable(DB_BLOG_SUBSCRIBE{})
+	dbNew.CreateTable(DB_BLOG_ZHUANLAN{})
+
+	fmt.Println("开始迁移文章数据")
+	var oldPosts []DB_BLOG_POST
+	dbOld.Model(DB_BLOG_POST{}).Find(&oldPosts)
+
+	for _, d := range oldPosts {
+		post := DB_BLOG_POST{
+			ID:         d.ID,
+			Name:       d.Name,
+			Title:      d.Title,
+			Date:       d.Date,
+			DatePlus:   d.DatePlus,
+			Update:     "",
+			Abstract:   d.Abstract,
+			Content:    d.Content,
+			Tags:       d.Tags,
+			Categories: d.Categories,
+			Pin:        0,
+		}
+		dbNew.Model(&DB_BLOG_POST{}).Create(&post)
+
+		// tags
+		for _, t := range strings.Fields(d.Tags) {
+			if t != "" {
+				tag := DB_BLOG_TAGS{
+					Tag:  t,
+					Name: d.Name,
+				}
+				dbNew.Model(&DB_BLOG_TAGS{}).Create(&tag)
+			}
+		}
+
+		// cates
+		for _, c := range strings.Fields(d.Categories) {
+			if c != "" {
+				cate := DB_BLOG_CATES{
+					Cate: c,
+					Name: d.Name,
+				}
+				dbNew.Model(&DB_BLOG_CATES{}).Create(&cate)
+			}
+		}
+	}
+
+	fmt.Println("开始迁移统计量")
+	var stats []DB_BLOG_VIEWS
+	dbOld.Model(DB_BLOG_VIEWS{}).Find(&stats)
+	for _, s := range stats {
+		stat := DB_BLOG_VIEWS{
+			Name:  s.Name,
+			View:  s.View,
+		}
+		dbNew.Model(DB_BLOG_VIEWS{}).Create(&stat)
+	}
+
+	fmt.Println("开始迁移留言")
+	var messages []DB_BLOG_MESSAGES
+	dbOld.Model(DB_BLOG_MESSAGES{}).Find(&messages)
+	for _, m := range messages {
+		mes := DB_BLOG_MESSAGES{
+			User:    m.User,
+			Date:    m.Date,
+			Message: m.Message,
+		}
+		dbNew.Model(DB_BLOG_MESSAGES{}).Create(&mes)
+	}
+	fmt.Println("迁移完毕")
+
+	return nil
+}
